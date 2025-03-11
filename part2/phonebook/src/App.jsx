@@ -10,7 +10,8 @@ const App = () => {
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [filteredName, setFilteredName] = useState('');
-  const [successMessage, setSuccessMessage] = useState(null);
+  const [notificationMessage, setNotificationMessage] = useState(null);
+  const [notificationMessageType, setNotificationMessageType] = useState(null);
 
   useEffect(() => {
     personService
@@ -68,11 +69,7 @@ const App = () => {
               setPersons(prevPersons => prevPersons.concat(returnedPerson));
               setNewName('');
               setNewNumber('');
-              setSuccessMessage(`Added ${returnedPerson.name}`);
-              setTimeout(() => {
-                setSuccessMessage(null);
-              }, 5000);
-
+              notifyUser(`Added ${returnedPerson.name}`, 'success');
           })
           .catch(error => {
             alert('Error: could not create person!');
@@ -87,9 +84,10 @@ const App = () => {
         .deletePerson(id)
         .then(deletedPerson => {
           setPersons(persons.filter(person => person.id !== deletedPerson.id));
+          notifyUser(`Person ${deletedPerson.name} is successfully deleted`, 'success');
         })
         .catch(error => {
-          alert(`Person ${personToDelete.name} is already deleted from the server`);
+          notifyUser(`Person ${personToDelete.name} is already deleted from the server`, 'error');
           setPersons(persons.filter(person => person.id !== personToDelete.id));
         });
     }
@@ -104,11 +102,6 @@ const App = () => {
       // Update state accordingly when the existing person wasn't shown in UI.
       if (!persons.find(person => person.id === updatedPerson.id)) {
         setPersons([...persons, updatedPerson]);
-        setSuccessMessage(`Person ${existingPerson.name} successfully updated`);
-        setTimeout(() => {
-          setSuccessMessage(null);
-        }, 5000);
-
       } else {
         setPersons(persons.map(person => {
           if (person.id === updatedPerson.id) {
@@ -117,11 +110,8 @@ const App = () => {
             return { ...person };
           }
         }));
-        setSuccessMessage(`Person ${existingPerson.name} successfully updated`);
-        setTimeout(() => {
-          setSuccessMessage(null);
-        }, 5000);
       }
+      notifyUser(`Person ${existingPerson.name} successfully updated`, 'success');
       setNewName('');
       setNewNumber('');
     })
@@ -137,10 +127,19 @@ const App = () => {
 
   const askForConfirm = text => window.confirm(text);
 
+  const notifyUser = (notification, messageType) => {
+    setNotificationMessage(notification);
+    setNotificationMessageType(messageType);
+    setTimeout(() => {
+      setNotificationMessage(null);
+      setNotificationMessageType(null);
+    }, 5000);
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={successMessage} />
+      <Notification message={notificationMessage} messageType={notificationMessageType} />
       <Filter
         filteredName={filteredName}
         handleFilteredNameChange={handleFilteredNameChange}
