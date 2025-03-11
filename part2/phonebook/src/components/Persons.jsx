@@ -9,7 +9,7 @@ const Persons = ({ persons, filteredName, handleDelete }) => {
         if (person.name.toLowerCase().startsWith(filteredName.toLowerCase())) {
           return (
             <Person
-              key={person.name}
+              key={person.id}
               person={person}
               handleDeletePerson={() => handleDelete(person.id)}
             />
