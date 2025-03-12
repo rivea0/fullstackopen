@@ -87,7 +87,7 @@ const App = () => {
           notifyUser(`Person ${deletedPerson.name} is successfully deleted`, 'success');
         })
         .catch(error => {
-          notifyUser(`Person ${personToDelete.name} is already deleted from the server`, 'error');
+          notifyUser(`Information of ${personToDelete.name} has already been removed from the server`, 'error');
           setPersons(persons.filter(person => person.id !== personToDelete.id));
         });
     }
