@@ -1,3 +1,5 @@
+import Weather from './Weather';
+
 const Country = ({ countryData }) => {
   return (
     <div>
@@ -11,6 +13,11 @@ const Country = ({ countryData }) => {
       <div>
         <img src={countryData.flagImgSrc} alt={countryData.flagImgAltText} />
       </div>
+      <h1>Weather in {countryData.capital}</h1>
+      <Weather
+        latitude={countryData.capitalLatLon[0]}
+        longitude={countryData.capitalLatLon[1]}
+      />
     </div>
   );
 }

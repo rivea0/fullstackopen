@@ -14,6 +14,7 @@ const CountryListItem = ({ name }) => {
           setCountryData({
             name: returnedCountry.name.common,
             capital: returnedCountry.capital,
+            capitalLatLon: returnedCountry.capitalInfo.latlng,
             area: returnedCountry.area,
             languages: Object.values(returnedCountry.languages),
             flagImgSrc: returnedCountry.flags.png,

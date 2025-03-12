@@ -12,6 +12,7 @@ const Content = ({ info, countries, country }) => {
             countryData={{
               name: country.name.common,
               capital: country.capital,
+              capitalLatLon: country.capitalInfo.latlng,
               area: country.area,
               languages: Object.values(country.languages),
               flagImgSrc: country.flags.png,
