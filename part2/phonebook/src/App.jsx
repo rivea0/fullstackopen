@@ -82,9 +82,9 @@ const App = () => {
     if (askForConfirm(`Delete ${personToDelete.name}?`)) {
       personService
         .deletePerson(id)
-        .then(deletedPerson => {
-          setPersons(persons.filter(person => person.id !== deletedPerson.id));
-          notifyUser(`Person ${deletedPerson.name} is successfully deleted`, 'success');
+        .then(() => {
+          setPersons(persons.filter(person => person.id !== personToDelete.id));
+          notifyUser(`Person ${personToDelete.name} is successfully deleted`, 'success');
         })
         .catch(error => {
           notifyUser(`Information of ${personToDelete.name} has already been removed from the server`, 'error');
