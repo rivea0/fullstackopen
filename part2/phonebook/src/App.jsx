@@ -72,7 +72,7 @@ const App = () => {
               notifyUser(`Added ${returnedPerson.name}`, 'success');
           })
           .catch(error => {
-            alert('Error: could not create person!');
+            notifyUser(error.response.data.error, 'error');
           });
       })
   }
@@ -116,7 +116,7 @@ const App = () => {
       setNewNumber('');
     })
     .catch(error => {
-      alert(`Could not update ${existingPerson.name}`);
+      notifyUser(error.response.data.error, 'error');
     });
   }
 
