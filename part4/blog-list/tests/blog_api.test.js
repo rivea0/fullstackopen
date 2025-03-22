@@ -70,6 +70,30 @@ test('a valid blog can be added', async () => {
   assert(urls.includes('https://robinrendle.com/notes/i-am-a-poem-i-am-not-software/'))
 })
 
+test('if the likes property is missing, it will default to 0', async () => {
+  const newBlog = {
+    title: 'Plain text journaling',
+    author: 'Herman Martinus',
+    url: 'https://herman.bearblog.dev/plain-text-journaling/',
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtEnd = await helper.blogsInDb()
+
+  const foundBlog = blogsAtEnd.find(e => {
+    if (e.title === newBlog.title && e.author === newBlog.author && e.url === newBlog.url) {
+      return e;
+    }
+  })
+
+  assert.strictEqual(foundBlog.likes, 0)
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
