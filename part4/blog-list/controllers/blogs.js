@@ -37,4 +37,52 @@ blogsRouter.post('/', async (request, response, next) => {
   }
 })
 
+blogsRouter.delete('/:id', async (request, response, next) => {
+  try {
+    const deletedBlog = await Blog.findByIdAndDelete(request.params.id)
+    if (deletedBlog) {
+      response.status(204).end()
+    } else {
+      response.status(404).end()
+    }
+  } catch(exception) {
+    next(exception)
+  }
+})
+
+blogsRouter.put('/:id', async (request, response, next) => {
+  const body = request.body
+
+  if (!body.title) {
+    return response.status(400).json({
+      error: 'title missing'
+    })
+  }
+
+  if (!body.url) {
+    return response.status(400).json({
+      error: 'url missing'
+    })
+  }
+
+  let blog = {
+    title: body.title,
+    author: body.author,
+    url: body.url,
+    likes: (!body.likes) ? 0 : body.likes
+  }
+
+  try {
+    const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
+
+    if (updatedBlog) {
+      response.json(updatedBlog)
+    } else {
+      response.status(400).end()
+    }
+  } catch(exception) {
+    next(exception)
+  }
+})
+
 module.exports = blogsRouter
