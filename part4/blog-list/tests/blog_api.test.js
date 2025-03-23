@@ -254,7 +254,7 @@ describe('updating blogs', () => {
   })
 })
 
-describe.only('when there is initially one user in db', () => {
+describe('when there is initially one user in db', () => {
   beforeEach(async () => {
     await User.deleteMany({})
 
@@ -264,7 +264,7 @@ describe.only('when there is initially one user in db', () => {
     await user.save()
   })
 
-  test.only('creation succeeds with a fresh username', async () => {
+  test('creation succeeds with a fresh username', async () => {
     const usersAtStart = await helper.usersInDb()
 
     const newUser = {
@@ -286,7 +286,7 @@ describe.only('when there is initially one user in db', () => {
     assert(usernames.includes(newUser.username))
   })
 
-  test.only('creation fails with 400 status code and message if username already taken', async () => {
+  test('creation fails with 400 status code and message if username already taken', async () => {
     const usersAtStart = await helper.usersInDb()
 
     const newUser = {
@@ -307,6 +307,91 @@ describe.only('when there is initially one user in db', () => {
     assert.strictEqual(usersAtEnd.length, usersAtStart.length)
   })
 })
+
+describe.only('creating a user', () => {
+  test.only('fails with 400 status code if username is not given', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      name: 'Someone',
+      password: 'test123'
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    assert(result.body.error.includes('username missing'))
+
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+  })
+
+  test.only('fails with 400 status code if password is not given', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'abramov',
+      name: 'Dan',
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    assert(result.body.error.includes('password missing'))
+
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+  })
+
+  test.only('fails with 400 status code if username is less than 3 characters', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'dc',
+      name: 'Dale',
+      password: 'test123'
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    assert(result.body.error.includes('username must be at least 3 characters'))
+
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+  })
+
+  test.only('fails with 400 status code if password is less than 3 characters', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'dalecooper',
+      name: 'Dale',
+      password: '12'
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    assert(result.body.error.includes('password must be at least 3 characters'))
+
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+  })
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
