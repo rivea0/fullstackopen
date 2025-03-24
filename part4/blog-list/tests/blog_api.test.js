@@ -10,8 +10,6 @@ const app = require('../app')
 const api = supertest(app)
 
 describe('when there are some blogs saved initially', () => {
-  let headers = null
-
   beforeEach(async () => {
     await User.deleteMany({})
 
@@ -22,14 +20,12 @@ describe('when there are some blogs saved initially', () => {
       .send(newUser)
 
     // Login new user
-    const responseLogin = await api
+    await api
       .post('/api/login')
       .send(newUser)
 
-    headers = { 'Authorization': `Bearer ${responseLogin.body.token}` }
-
     await Blog.deleteMany({})
-    await Blog.insertMany(helper.initialBlogs.map(blog => ({...blog, user: responseUser.body.id})))
+    await Blog.insertMany(helper.initialBlogs.map(blog => ({ ...blog, user: responseUser.body.id })))
   })
 
   test('blogs are returned as json', async () => {
@@ -105,7 +101,7 @@ describe('adding a blog', () => {
     headers = { 'Authorization': `Bearer ${responseLogin.body.token}` }
 
     await Blog.deleteMany({})
-    await Blog.insertMany(helper.initialBlogs.map(blog => ({...blog, user: responseUser.body.id})))
+    await Blog.insertMany(helper.initialBlogs.map(blog => ({ ...blog, user: responseUser.body.id })))
   })
 
   test('fails with 400 status code if blog is without title', async () => {
@@ -208,7 +204,7 @@ describe('adding a blog', () => {
 
     const foundBlog = blogsAtEnd.find(e => {
       if (e.title === newBlog.title && e.author === newBlog.author && e.url === newBlog.url) {
-        return e;
+        return e
       }
     })
 
@@ -236,7 +232,7 @@ describe('deleting a blog', () => {
     headers = { 'Authorization': `Bearer ${responseLogin.body.token}` }
 
     await Blog.deleteMany({})
-    await Blog.insertMany(helper.initialBlogs.map(blog => ({...blog, user: responseUser.body.id})))
+    await Blog.insertMany(helper.initialBlogs.map(blog => ({ ...blog, user: responseUser.body.id })))
   })
 
   test('succeeds with status code 204 if id is valid', async () => {
@@ -318,7 +314,7 @@ describe('updating blogs', () => {
     headers = { 'Authorization': `Bearer ${responseLogin.body.token}` }
 
     await Blog.deleteMany({})
-    await Blog.insertMany(helper.initialBlogs.map(blog => ({...blog, user: responseUser.body.id})))
+    await Blog.insertMany(helper.initialBlogs.map(blog => ({ ...blog, user: responseUser.body.id })))
   })
 
   test('succeeds with a valid id', async () => {
