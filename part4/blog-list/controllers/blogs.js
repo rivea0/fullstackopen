@@ -35,6 +35,9 @@ blogsRouter.post('/', middleware.userExtractor, async (request, response, next) 
 
   try {
     const user = await User.findById(userId)
+    if (!user) {
+      return response.status(401).json({ error: 'token invalid' })
+    }
 
     const blog = new Blog({
       title: body.title,
