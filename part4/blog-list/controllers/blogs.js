@@ -88,8 +88,19 @@ blogsRouter.delete('/:id', middleware.userExtractor, async (request, response, n
   }
 })
 
-blogsRouter.put('/:id', async (request, response, next) => {
+blogsRouter.put('/:id', middleware.userExtractor, async (request, response, next) => {
   const body = request.body
+
+  let userId = null
+
+  try {
+    userId = request.user
+    if (!userId) {
+      return response.status(401).json({ error: 'token invalid' })
+    }
+  } catch(exception) {
+    next(exception)
+  }
 
   if (!body.title) {
     return response.status(400).json({
@@ -111,6 +122,11 @@ blogsRouter.put('/:id', async (request, response, next) => {
   }
 
   try {
+    const user = await User.findById(userId)
+    if (!user) {
+      return response.status(401).json({ error: 'token invalid' })
+    }
+
     const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
 
     if (updatedBlog) {

@@ -116,7 +116,7 @@ describe('adding a blog', () => {
       likes: 100
     }
 
-    const result = await api
+    const response = await api
       .post('/api/blogs')
       .send(newBlog)
       .set(headers)
@@ -125,7 +125,7 @@ describe('adding a blog', () => {
     const blogsAtEnd = await helper.blogsInDb()
 
     assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
-    assert(result.body.error.includes('title missing'))
+    assert(response.body.error.includes('title missing'))
   })
 
   test('fails with 400 status code if blog is without url', async () => {
@@ -135,7 +135,7 @@ describe('adding a blog', () => {
       likes: 100
     }
 
-    const result = await api
+    const response = await api
       .post('/api/blogs')
       .send(newBlog)
       .set(headers)
@@ -144,7 +144,7 @@ describe('adding a blog', () => {
     const blogsAtEnd = await helper.blogsInDb()
 
     assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
-    assert(result.body.error.includes('url missing'))
+    assert(response.body.error.includes('url missing'))
   })
 
   test('fails with 401 status code when token is invalid', async () => {
@@ -155,13 +155,13 @@ describe('adding a blog', () => {
       likes: 50
     }
 
-    const result = await api
+    const response = await api
       .post('/api/blogs')
       .send(newBlog)
       .expect(401)
       .expect('Content-Type', /application\/json/)
 
-    assert(result.body.error.includes('token invalid'))
+    assert(response.body.error.includes('token invalid'))
   })
 
   test('succeeds with valid data', async () => {
@@ -264,12 +264,12 @@ describe('deleting a blog', () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToDelete = blogsAtStart[0]
 
-    const result = await api
+    const response = await api
       .delete(`/api/blogs/${blogToDelete.id}`)
       .expect(401)
       .expect('Content-Type', /application\/json/)
 
-    assert(result.body.error.includes('token invalid'))
+    assert(response.body.error.includes('token invalid'))
   })
 
   test('fails with 401 status code if user is invalid', async () => {
@@ -280,7 +280,7 @@ describe('deleting a blog', () => {
       .send(newUser2)
 
     // Login the newly created user
-    const response = await api
+    const loginResponse = await api
       .post('/api/login')
       .send(newUser2)
 
@@ -289,23 +289,40 @@ describe('deleting a blog', () => {
     // Belongs to the first user created inside beforeEach
     const blogToDelete = blogsAtStart[0]
 
-    const result = await api
+    const response = await api
       .delete(`/api/blogs/${blogToDelete.id}`)
-      .set({ 'Authorization': `Bearer ${response.body.token}` })
+      .set({ 'Authorization': `Bearer ${loginResponse.body.token}` })
       .expect(401)
       .expect('Content-Type', /application\/json/)
 
-    assert(result.body.error.includes('invalid user'))
+    assert(response.body.error.includes('invalid user'))
   })
 })
 
-describe.skip('updating blogs', () => {
+describe('updating blogs', () => {
+  let headers = null
+
   beforeEach(async () => {
+    await User.deleteMany({})
+
+    // Create new user
+    const newUser = { username: 'root', password: 'secret' }
+    const responseUser = await api
+      .post('/api/users')
+      .send(newUser)
+
+    // Login new user
+    const responseLogin = await api
+      .post('/api/login')
+      .send(newUser)
+
+    headers = { 'Authorization': `Bearer ${responseLogin.body.token}` }
+
     await Blog.deleteMany({})
-    await Blog.insertMany(helper.initialBlogs)
+    await Blog.insertMany(helper.initialBlogs.map(blog => ({...blog, user: responseUser.body.id})))
   })
 
-  test.skip('succeeds with a valid id', async () => {
+  test('succeeds with a valid id', async () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToUpdate = blogsAtStart[0]
 
@@ -317,6 +334,7 @@ describe.skip('updating blogs', () => {
     await api
       .put(`/api/blogs/${blogToUpdate.id}`)
       .send(updatedBlog)
+      .set(headers)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
@@ -327,7 +345,7 @@ describe.skip('updating blogs', () => {
     assert.strictEqual(resultBlog.title, updatedBlog.title)
   })
 
-  test.skip('updates likes', async () => {
+  test('updates likes', async () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToUpdate = blogsAtStart[0]
 
@@ -339,6 +357,7 @@ describe.skip('updating blogs', () => {
     await api
       .put(`/api/blogs/${blogToUpdate.id}`)
       .send(updatedBlog)
+      .set(headers)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
@@ -349,7 +368,7 @@ describe.skip('updating blogs', () => {
     assert.strictEqual(resultBlog.likes, blogToUpdate.likes + 1)
   })
 
-  test.skip('updates author', async () => {
+  test('updates author', async () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToUpdate = blogsAtStart[0]
 
@@ -361,6 +380,7 @@ describe.skip('updating blogs', () => {
     await api
       .put(`/api/blogs/${blogToUpdate.id}`)
       .send(updatedBlog)
+      .set(headers)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
@@ -371,7 +391,7 @@ describe.skip('updating blogs', () => {
     assert.strictEqual(resultBlog.author, updatedBlog.author)
   })
 
-  test.skip('updates url', async () => {
+  test('updates url', async () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToUpdate = blogsAtStart[0]
 
@@ -383,6 +403,7 @@ describe.skip('updating blogs', () => {
     await api
       .put(`/api/blogs/${blogToUpdate.id}`)
       .send(updatedBlog)
+      .set(headers)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
@@ -391,6 +412,24 @@ describe.skip('updating blogs', () => {
 
     const resultBlog = blogsAtEnd.find(blog => blog.id === updatedBlog.id)
     assert.strictEqual(resultBlog.url, updatedBlog.url)
+  })
+
+  test('fails with 401 status code when token is invalid', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToUpdate = blogsAtStart[0]
+
+    const updatedBlog = {
+      ...blogToUpdate,
+      url: 'https://patterns.dev',
+    }
+
+    const response = await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send(updatedBlog)
+      .expect(401)
+      .expect('Content-Type', /application\/json/)
+
+    assert(response.body.error.includes('token invalid'))
   })
 })
 
