@@ -78,6 +78,34 @@ const App = () => {
     }
   }
 
+  const updateBlog = async (blogId, updatedBlogObject) => {
+    try {
+      const response = await blogService.update(blogId, updatedBlogObject)
+      const blogToUpdate = blogs.find(blog => blog.id === blogId)
+      const updatedBlogs = blogs.map(blog => {
+        if (blog.id === blogId) {
+          return { ...updatedBlogObject, user: blogToUpdate.user, id: blogId }
+        } else {
+          return blog
+        }
+      })
+      setBlogs(updatedBlogs)
+      setNotificationMessage(`blog ${updatedBlogObject.title} by ${updatedBlogObject.author} updated`)
+      setNotificationMessageType('success')
+
+      setTimeout(() => {
+        setNotificationMessage(null)
+        setNotificationMessageType(null)
+      }, 5000)
+    } catch (error) {
+      if (error.response.data.error === 'token expired') {
+        setNotificationMessage('user token expired')
+        setNotificationMessageType('error')
+        handleLogout()
+      }
+    }
+  }
+
   const handleLogin = async (event) => {
     event.preventDefault()
 
@@ -139,7 +167,7 @@ const App = () => {
             </>
           )}
           {blogs.map(blog =>
-            <Blog key={blog.id} blog={blog} />
+            <Blog key={blog.id} blog={blog} updateBlog={updateBlog} />
           )}
         </div>
       }

@@ -114,11 +114,14 @@ blogsRouter.put('/:id', middleware.userExtractor, async (request, response, next
     })
   }
 
+  const creatorOfBlog = await User.findById(body.user)
+
   let blog = {
     title: body.title,
     author: body.author,
     url: body.url,
-    likes: (!body.likes) ? 0 : body.likes
+    likes: (!body.likes) ? 0 : body.likes,
+    user: creatorOfBlog
   }
 
   try {
