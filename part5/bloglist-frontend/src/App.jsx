@@ -80,7 +80,7 @@ const App = () => {
 
   const updateBlog = async (blogId, updatedBlogObject) => {
     try {
-      const response = await blogService.update(blogId, updatedBlogObject)
+      await blogService.update(blogId, updatedBlogObject)
       const blogToUpdate = blogs.find(blog => blog.id === blogId)
       const updatedBlogs = blogs.map(blog => {
         if (blog.id === blogId) {
@@ -91,6 +91,31 @@ const App = () => {
       })
       setBlogs(updatedBlogs)
       setNotificationMessage(`blog ${updatedBlogObject.title} by ${updatedBlogObject.author} updated`)
+      setNotificationMessageType('success')
+
+      setTimeout(() => {
+        setNotificationMessage(null)
+        setNotificationMessageType(null)
+      }, 5000)
+    } catch (error) {
+      if (error.response.data.error === 'token expired') {
+        setNotificationMessage('user token expired')
+        setNotificationMessageType('error')
+        handleLogout()
+      }
+    }
+  }
+
+  const removeBlog = async (blogId) => {
+    try {
+      await blogService.deleteBlog(blogId)
+      setBlogs(blogs.filter(blog => blog.id !== blogId))
+
+      const {
+        title: removedBlogTitle,
+        author: removedBlogAuthor
+      } = blogs.find(blog => blog.id === blogId)
+      setNotificationMessage(`blog ${removedBlogTitle} by ${removedBlogAuthor} deleted`)
       setNotificationMessageType('success')
 
       setTimeout(() => {
@@ -167,7 +192,17 @@ const App = () => {
             </>
           )}
           {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
-            <Blog key={blog.id} blog={blog} updateBlog={updateBlog} />
+            <Blog
+              key={blog.id}
+              blog={blog}
+              updateBlog={updateBlog}
+              // `user` object only has `token`, `username`, `name` fields.
+              // user's `id` can be added to response data in the login route in the backend (which is against part4 exercise requirements)
+              // and checked for equality with the blog's user `ids`.
+              // `username` field is used in this case, as it's also unique in schema.
+              addedByUser={user.username === blog.user.username}
+              removeBlog={removeBlog}
+            />
           )}
         </div>
       }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const Blog = ({ blog, updateBlog }) => {
+const Blog = ({ blog, updateBlog, addedByUser, removeBlog }) => {
   const [showDetails, setShowDetails] = useState(false)
 
   const blogStyle = {
@@ -23,6 +23,13 @@ const Blog = ({ blog, updateBlog }) => {
     await updateBlog(blog.id, newBlog)
   }
 
+  const handleRemove = async () => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
+      await removeBlog(blog.id)
+    } else {
+      return
+    }
+  }
   return (
     <div style={blogStyle}>
       <div>
@@ -39,6 +46,10 @@ const Blog = ({ blog, updateBlog }) => {
               </form>
             </div>
             <div>{blog.user.name || blog.user.username}</div>
+            {addedByUser &&
+            <div>
+              <button type="button" onClick={handleRemove}>remove</button>
+            </div>}
           </>
         }
       </div>
