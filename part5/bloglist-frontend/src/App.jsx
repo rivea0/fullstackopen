@@ -74,6 +74,10 @@ const App = () => {
         setNotificationMessage('user token expired')
         setNotificationMessageType('error')
         handleLogout()
+        setTimeout(() => {
+          setNotificationMessage(null)
+          setNotificationMessageType(null)
+        }, 5000)
       }
     }
   }
@@ -102,6 +106,10 @@ const App = () => {
         setNotificationMessage('user token expired')
         setNotificationMessageType('error')
         handleLogout()
+        setTimeout(() => {
+          setNotificationMessage(null)
+          setNotificationMessageType(null)
+        }, 5000)
       }
     }
   }
@@ -127,6 +135,10 @@ const App = () => {
         setNotificationMessage('user token expired')
         setNotificationMessageType('error')
         handleLogout()
+        setTimeout(() => {
+          setNotificationMessage(null)
+          setNotificationMessageType(null)
+        }, 5000)
       }
     }
   }
