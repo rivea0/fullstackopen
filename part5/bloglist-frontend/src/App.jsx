@@ -17,7 +17,7 @@ const App = () => {
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
-    )  
+    )
   }, [])
 
   useEffect(() => {
@@ -57,7 +57,16 @@ const App = () => {
     try {
       const response = await blogService.create(blogObject)
 
-      const updatedBlogs = blogs.concat({ ...blogObject, id: response.data.id })
+      const updatedBlogs = blogs.concat({
+        ...blogObject,
+        id: response.data.id,
+        user: {
+          id: response.data.user,
+          name: user.name,
+          username: user.username
+        },
+        likes: blogObject.likes || 0
+      })
 
       setBlogs(updatedBlogs)
       setNotificationMessage(`a new blog ${blogObject.title} by ${blogObject.author} added`)
