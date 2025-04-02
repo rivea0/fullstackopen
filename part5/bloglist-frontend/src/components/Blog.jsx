@@ -32,10 +32,10 @@ const Blog = ({ blog, updateBlog, addedByUser, removeBlog }) => {
     }
   }
   return (
-    <div style={blogStyle}>
+    <div style={blogStyle} className='blog'>
       <div className='blogTitleAndAuthorInfo'>
         {blog.title} - {blog.author}
-        <button type="button" onClick={() => setShowDetails(!showDetails)}>
+        <button type="button" onClick={() => setShowDetails(!showDetails)} className="detailsButton">
           {showDetails ? 'hide' : 'view'}
         </button>
         {showDetails &&
@@ -43,7 +43,7 @@ const Blog = ({ blog, updateBlog, addedByUser, removeBlog }) => {
             <div className='url'>{blog.url}</div>
             <div className='likes'>likes: {blog.likes}
               <form onSubmit={handleLikeUpdate}>
-                <button type="submit">like</button>
+                <button type="submit" className="likeButton">like</button>
               </form>
             </div>
             <div>{blog.user.name || blog.user.username}</div>

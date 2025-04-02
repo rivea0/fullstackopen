@@ -29,6 +29,7 @@ const AddBlogForm = ({ createBlog }) => {
         title:
         <input
           value={newBlogTitle}
+          id="new-blog-title"
           onChange={(e) => setNewBlogTitle(e.target.value)}
           placeholder="Enter title"
         />
@@ -37,6 +38,7 @@ const AddBlogForm = ({ createBlog }) => {
         author:
         <input
           value={newBlogAuthor}
+          id="new-blog-author"
           onChange={(e) => setNewBlogAuthor(e.target.value)}
           placeholder="Enter author"
         />
@@ -45,11 +47,12 @@ const AddBlogForm = ({ createBlog }) => {
         url:
         <input
           value={newBlogUrl}
+          id="new-blog-url"
           onChange={(e) => setNewBlogUrl(e.target.value)}
           placeholder="Enter url"
         />
       </div>
-      <button type="submit">create</button>
+      <button type="submit" id="create-blog-button">create</button>
     </form>
   )
 }
