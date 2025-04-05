@@ -1,12 +1,12 @@
-import { useDispatch } from "react-redux"
-import { filterAnecdote } from "../reducers/filterReducer"
+import { useDispatch } from 'react-redux'
+import { setFilter } from '../reducers/filterReducer'
 
 const Filter = () => {
   const dispatch = useDispatch()
 
   const filterChange = (filterText) => {
     const filterPayload = filterText ? filterText : 'ALL'
-    dispatch(filterAnecdote(filterPayload))
+    dispatch(setFilter(filterPayload))
   }
 
   const handleChange = (event) => {
