@@ -1,35 +1,25 @@
 import { useState, useEffect } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import AddBlogForm from './components/AddBlogForm'
-import blogService from './services/blogs'
-import loginService from './services/login'
 import { setNotification } from './reducers/notificationReducer'
+import { authUser, loginUser, logoutUser } from './reducers/userReducer'
+import { createBlog, getAllBlogs, updateBlog, removeBlog } from './reducers/blogReducer'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
   const [blogFormVisible, setBlogFormVisible] = useState(false)
   const dispatch = useDispatch()
-
-
-  useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )
-  }, [])
+  const currentUser = useSelector((state) => state.user.signedInUser)
+  const blogs = useSelector((state) => state.blog.allBlogs)
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedBlogAppUser')
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      blogService.setToken(user.token)
-    }
-  }, [])
+    dispatch(getAllBlogs())
+    dispatch(authUser())
+  }, [dispatch])
+
 
   const loginForm = () => (
     <form onSubmit={handleLogin}>
@@ -57,22 +47,9 @@ const App = () => {
     </form>
   )
 
-  const createBlog = async (blogObject) => {
+  const handleCreateBlog = async (blogObject) => {
     try {
-      const response = await blogService.create(blogObject)
-
-      const updatedBlogs = blogs.concat({
-        ...blogObject,
-        id: response.data.id,
-        user: {
-          id: response.data.user,
-          name: user.name,
-          username: user.username
-        },
-        likes: blogObject.likes || 0
-      })
-
-      setBlogs(updatedBlogs)
+      dispatch(createBlog(blogObject, currentUser.name, currentUser.username))
       dispatch(setNotification(`a new blog ${blogObject.title} by ${blogObject.author} added`, 'success', 5))
       setBlogFormVisible(false)
     } catch (error) {
@@ -83,18 +60,9 @@ const App = () => {
     }
   }
 
-  const updateBlog = async (blogId, updatedBlogObject) => {
+  const handleUpdateBlog = async (blogId, updatedBlogObject) => {
     try {
-      await blogService.update(blogId, updatedBlogObject)
-      const blogToUpdate = blogs.find(blog => blog.id === blogId)
-      const updatedBlogs = blogs.map(blog => {
-        if (blog.id === blogId) {
-          return { ...updatedBlogObject, user: blogToUpdate.user, id: blogId }
-        } else {
-          return blog
-        }
-      })
-      setBlogs(updatedBlogs)
+      dispatch(updateBlog(blogId, updatedBlogObject))
       dispatch(setNotification(`blog ${updatedBlogObject.title} by ${updatedBlogObject.author} updated`, 'success', 5))
     } catch (error) {
       if (error.response.data.error === 'token expired') {
@@ -104,15 +72,13 @@ const App = () => {
     }
   }
 
-  const removeBlog = async (blogId) => {
+  const handleRemoveBlog = async (blogId) => {
     try {
-      await blogService.deleteBlog(blogId)
-      setBlogs(blogs.filter(blog => blog.id !== blogId))
-
       const {
         title: removedBlogTitle,
         author: removedBlogAuthor
       } = blogs.find(blog => blog.id === blogId)
+      dispatch(removeBlog(blogId))
       dispatch(setNotification(`blog ${removedBlogTitle} by ${removedBlogAuthor} deleted`, 'success', 5))
     } catch (error) {
       if (error.response.data.error === 'token expired') {
@@ -124,26 +90,18 @@ const App = () => {
 
   const handleLogin = async (event) => {
     event.preventDefault()
-
-    try {
-      const user = await loginService.login({
-        username, password
+    dispatch(loginUser(username, password))
+      .then(() => {
+        setUsername('')
+        setPassword('')
       })
-      window.localStorage.setItem(
-        'loggedBlogAppUser', JSON.stringify(user)
-      )
-      blogService.setToken(user.token)
-      setUser(user)
-      setUsername('')
-      setPassword('')
-    } catch (exception) {
-      dispatch(setNotification('wrong username or password', 'error', 5))
-    }
+      .catch(() => {
+        dispatch(setNotification('wrong username or password', 'error', 5))
+      })
   }
 
   const handleLogout = () => {
-    window.localStorage.removeItem('loggedBlogAppUser')
-    setUser(null)
+    dispatch(logoutUser())
   }
 
   const hideWhenVisible = { display: blogFormVisible ? 'none' : '' }
@@ -152,14 +110,14 @@ const App = () => {
   return (
     <div>
       <Notification />
-      {user === null ?
+      {currentUser === null ?
         <div>
           <h2>log in to application</h2>
           {loginForm()}
         </div> :
         <div id="all-blogs">
           <h2>blogs</h2>
-          <div>{user.name} logged in
+          <div>{currentUser.name} logged in
             <button type="button" onClick={handleLogout}>logout</button>
           </div>
           <div style={hideWhenVisible}>
@@ -168,23 +126,24 @@ const App = () => {
           { blogFormVisible && (
             <>
               <h2>create new</h2>
-              <AddBlogForm createBlog={createBlog} />
+              <AddBlogForm createBlog={handleCreateBlog} />
               <div style={showWhenVisible}>
                 <button type="button" onClick={() => setBlogFormVisible(false)}>cancel</button>
               </div>
             </>
           )}
-          {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
+          {[...blogs].sort((a, b) => b.likes - a.likes).map(blog =>
             <Blog
               key={blog.id}
               blog={blog}
-              updateBlog={updateBlog}
+              updateBlog={handleUpdateBlog}
               // `user` object only has `token`, `username`, `name` fields.
               // user's `id` can be added to response data in the login route in the backend (which is against part4 exercise requirements)
               // and checked for equality with the blog's user `ids`.
               // `username` field is used in this case, as it's also unique in schema.
-              addedByUser={user.username === blog.user.username}
-              removeBlog={removeBlog}
+              // addedByUser={user.username === blog.user.username}
+              addedByUser={currentUser.username === blog.user.username}
+              removeBlog={handleRemoveBlog}
             />
           )}
         </div>
