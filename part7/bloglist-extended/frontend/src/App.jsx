@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react'
+import { useDispatch } from 'react-redux'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import AddBlogForm from './components/AddBlogForm'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import { setNotification } from './reducers/notificationReducer'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [notificationMessage, setNotificationMessage] = useState(null)
-  const [notificationMessageType, setNotificationMessageType] = useState(null)
   const [blogFormVisible, setBlogFormVisible] = useState(false)
+  const dispatch = useDispatch()
+
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -71,24 +73,12 @@ const App = () => {
       })
 
       setBlogs(updatedBlogs)
-      setNotificationMessage(`a new blog ${blogObject.title} by ${blogObject.author} added`)
-      setNotificationMessageType('success')
-
-      setTimeout(() => {
-        setNotificationMessage(null)
-        setNotificationMessageType(null)
-      }, 5000)
-
+      dispatch(setNotification(`a new blog ${blogObject.title} by ${blogObject.author} added`, 'success', 5))
       setBlogFormVisible(false)
     } catch (error) {
       if (error.response.data.error === 'token expired') {
-        setNotificationMessage('user token expired')
-        setNotificationMessageType('error')
+        dispatch(setNotification('user token expired', 'error', 5))
         handleLogout()
-        setTimeout(() => {
-          setNotificationMessage(null)
-          setNotificationMessageType(null)
-        }, 5000)
       }
     }
   }
@@ -105,22 +95,11 @@ const App = () => {
         }
       })
       setBlogs(updatedBlogs)
-      setNotificationMessage(`blog ${updatedBlogObject.title} by ${updatedBlogObject.author} updated`)
-      setNotificationMessageType('success')
-
-      setTimeout(() => {
-        setNotificationMessage(null)
-        setNotificationMessageType(null)
-      }, 5000)
+      dispatch(setNotification(`blog ${updatedBlogObject.title} by ${updatedBlogObject.author} updated`, 'success', 5))
     } catch (error) {
       if (error.response.data.error === 'token expired') {
-        setNotificationMessage('user token expired')
-        setNotificationMessageType('error')
+        dispatch(setNotification('user token expired', 'error', 5))
         handleLogout()
-        setTimeout(() => {
-          setNotificationMessage(null)
-          setNotificationMessageType(null)
-        }, 5000)
       }
     }
   }
@@ -134,22 +113,11 @@ const App = () => {
         title: removedBlogTitle,
         author: removedBlogAuthor
       } = blogs.find(blog => blog.id === blogId)
-      setNotificationMessage(`blog ${removedBlogTitle} by ${removedBlogAuthor} deleted`)
-      setNotificationMessageType('success')
-
-      setTimeout(() => {
-        setNotificationMessage(null)
-        setNotificationMessageType(null)
-      }, 5000)
+      dispatch(setNotification(`blog ${removedBlogTitle} by ${removedBlogAuthor} deleted`, 'success', 5))
     } catch (error) {
       if (error.response.data.error === 'token expired') {
-        setNotificationMessage('user token expired')
-        setNotificationMessageType('error')
+        dispatch(setNotification('user token expired', 'error', 5))
         handleLogout()
-        setTimeout(() => {
-          setNotificationMessage(null)
-          setNotificationMessageType(null)
-        }, 5000)
       }
     }
   }
@@ -169,12 +137,7 @@ const App = () => {
       setUsername('')
       setPassword('')
     } catch (exception) {
-      setNotificationMessage('wrong username or password')
-      setNotificationMessageType('error')
-      setTimeout(() => {
-        setNotificationMessage(null)
-        setNotificationMessageType(null)
-      }, 5000)
+      dispatch(setNotification('wrong username or password', 'error', 5))
     }
   }
 
@@ -188,10 +151,7 @@ const App = () => {
 
   return (
     <div>
-      <Notification
-        message={notificationMessage}
-        messageType={notificationMessageType}
-      />
+      <Notification />
       {user === null ?
         <div>
           <h2>log in to application</h2>
