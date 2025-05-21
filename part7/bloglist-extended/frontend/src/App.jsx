@@ -11,6 +11,7 @@ import Users from './components/Users'
 import User from './components/User'
 import LoginForm from './components/LoginForm'
 import NavMenu from './components/NavMenu'
+import { H2 } from './components/ui/Heading'
 
 const App = () => {
   const dispatch = useDispatch()
@@ -28,13 +29,13 @@ const App = () => {
         <Notification />
         {currentUser === null ? (
           <div>
-            <h2>log in to application</h2>
+            <H2>log in to application</H2>
             <LoginForm />
           </div>
         ) : (
           <div>
             <NavMenu currentUserName={currentUser.name} />
-            <h2>blog app</h2>
+            <H2>blog app</H2>
             <Routes>
               <Route
                 path="/"

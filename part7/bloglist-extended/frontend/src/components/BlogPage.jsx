@@ -6,6 +6,10 @@ import { logoutUser } from '../reducers/userReducer'
 import { getAllCommentsOfBlog } from '../reducers/commentReducer'
 import { useEffect } from 'react'
 import BlogCommentForm from './BlogCommentForm'
+import Button from './ui/Button'
+import RedButton from './ui/RedButton'
+import { H1, H2 } from './ui/Heading'
+import StyledLink from './ui/StyledLink'
 
 const BlogPage = ({ currentUserData }) => {
   const dispatch = useDispatch()
@@ -85,26 +89,22 @@ const BlogPage = ({ currentUserData }) => {
 
   return (
     <div id="blogDiv">
-      <h1>{foundBlog.title}</h1>
-      <a href={foundBlog.url}>{foundBlog.url}</a>
+      <H1>{foundBlog.title}</H1>
+      <StyledLink href={foundBlog.url}>{foundBlog.url}</StyledLink>
       <div className="likes">
         {foundBlog.likes} {foundBlog.likes.length === 1 ? 'like' : 'likes'}
         <form onSubmit={handleLikeUpdate}>
-          <button type="submit" className="likeButton">
-            like
-          </button>
+          <Button type="submit" className="likeButton">like</Button>
         </form>
       </div>
       <div>Added by {foundBlog.user.name || foundBlog.user.username}</div>
       {addedByCurrentUser && (
         <div>
-          <button type="button" onClick={handleRemove}>
-            remove
-          </button>
+          <RedButton type="button" onClick={handleRemove}>remove</RedButton>
         </div>
       )}
       <div>
-        <h2>comments</h2>
+        <H2>comments</H2>
         <BlogCommentForm blogId={foundBlog.id} />
         {commentsOfBlog && (
           <ul>

@@ -1,32 +1,30 @@
 import { useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { logoutUser } from '../reducers/userReducer'
+import Button from './ui/Button'
+import NavHeader from './ui/NavHeader'
 
 const NavMenu = ({ currentUserName }) => {
   const dispatch = useDispatch()
   const handleLogout = () => {
     dispatch(logoutUser())
   }
-  const navHeaderStyle = {
-    backgroundColor: 'silver',
-    padding: '4px'
-  }
 
   return (
-    <div style={navHeaderStyle}>
-      <Link style={{ padding: '4px' }} to="/">
+    <NavHeader>
+      <Link to="/">
         blogs
       </Link>
-      <Link style={{ padding: '4px' }} to="/users">
+      <Link to="/users">
         users
       </Link>
-      <span style={{ paddingLeft: '8px' }}>
+      <span>
         {currentUserName} logged in
-        <button type="button" onClick={handleLogout}>
-          logout
-        </button>
+        <Button type="button" onClick={handleLogout}>
+          Logout
+        </Button>
       </span>
-    </div>
+    </NavHeader>
   )
 }
 

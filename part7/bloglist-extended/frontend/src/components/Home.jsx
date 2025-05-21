@@ -5,6 +5,11 @@ import { useState } from 'react'
 import { setNotification } from '../reducers/notificationReducer'
 import { createBlog } from '../reducers/blogReducer'
 import { logoutUser } from '../reducers/userReducer'
+import Button from './ui/Button'
+import RedButton from './ui/RedButton'
+import { H2 } from './ui/Heading'
+import BlogTitleDiv from './ui/BlogTitleDiv'
+import StyledLink from './ui/StyledLink'
 
 const Home = ({ currentUserData }) => {
   const dispatch = useDispatch()
@@ -40,22 +45,17 @@ const Home = ({ currentUserData }) => {
     }
   }
 
-
   return (
     <div id='all-blogs'>
       <div style={hideWhenVisible}>
-        <button type="button" onClick={() => setBlogFormVisible(true)}>
-          create new
-        </button>
+        <Button type="button" onClick={() => setBlogFormVisible(true)}>create new</Button>
       </div>
       {blogFormVisible && (
         <>
-          <h2>create new</h2>
+          <H2>create new</H2>
           <AddBlogForm createBlog={handleCreateBlog} />
           <div style={showWhenVisible}>
-            <button type="button" onClick={() => setBlogFormVisible(false)}>
-              cancel
-            </button>
+            <RedButton type="button" onClick={() => setBlogFormVisible(false)}>cancel</RedButton>
           </div>
         </>
       )}
@@ -63,9 +63,9 @@ const Home = ({ currentUserData }) => {
       {[...blogs]
         .sort((a, b) => b.likes - a.likes)
         .map((blog) => (
-          <div style={blogStyle} key={blog.id}>
-            <Link to={`/blogs/${blog.id}`} className='blog'>{blog.title}</Link>
-          </div>
+          <BlogTitleDiv key={blog.id}>
+            <StyledLink to={`/blogs/${blog.id}`} className='blog'>{blog.title}</StyledLink>
+          </BlogTitleDiv>
         ))}
     </div>
   )

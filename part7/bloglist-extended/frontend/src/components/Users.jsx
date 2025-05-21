@@ -1,12 +1,13 @@
 import { useSelector } from 'react-redux'
-import { Link } from 'react-router-dom'
+import { H1 } from './ui/Heading'
+import StyledLink from './ui/StyledLink'
 
 const Users = () => {
   const users = useSelector((state) => state.users.allUsers)
 
   return (
     <div>
-      <h1>Users</h1>
+      <H1>Users</H1>
       <table>
         <tbody>
           <tr>
@@ -16,7 +17,7 @@ const Users = () => {
           {users.map(user => {
             return (
               <tr key={user.id}>
-                <td><Link to={`/users/${user.id}`}>{user.name}</Link></td>
+                <td><StyledLink to={`/users/${user.id}`}>{user.name}</StyledLink></td>
                 <td>{user.blogs.length}</td>
               </tr>
             )
