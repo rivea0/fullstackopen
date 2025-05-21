@@ -3,6 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { setNotification } from '../reducers/notificationReducer'
 import { updateBlog, removeBlog } from '../reducers/blogReducer'
 import { logoutUser } from '../reducers/userReducer'
+import { getAllCommentsOfBlog } from '../reducers/commentReducer'
+import { useEffect } from 'react'
+import BlogCommentForm from './BlogCommentForm'
 
 const BlogPage = ({ currentUserData }) => {
   const dispatch = useDispatch()
@@ -11,6 +14,14 @@ const BlogPage = ({ currentUserData }) => {
   const blogs = useSelector((state) => state.blog.allBlogs)
   const id = useParams().id
   const foundBlog = blogs.find((blog) => blog.id === String(id))
+
+  useEffect(() => {
+    if (foundBlog) {
+      dispatch(getAllCommentsOfBlog(id))
+    }
+  }, [dispatch, foundBlog, id])
+
+  const commentsOfBlog = useSelector((state) => state.comments.blogComments)
 
   if (!foundBlog) {
     return null
@@ -92,6 +103,17 @@ const BlogPage = ({ currentUserData }) => {
           </button>
         </div>
       )}
+      <div>
+        <h2>comments</h2>
+        <BlogCommentForm blogId={foundBlog.id} />
+        {commentsOfBlog && (
+          <ul>
+            {[...commentsOfBlog].map((comment) => (
+              <li key={comment.id}>{comment.text}</li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   )
 }
